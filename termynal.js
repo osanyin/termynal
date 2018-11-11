@@ -25,6 +25,7 @@ class Termynal {
 	 * @param {number} options.progressPercent - Max percent of progress.
      * @param {string} options.cursor – Character to use for cursor, defaults to ▋.
      * @param {Object[]} lineData - Dynamically loaded line data objects.
+     * @param {function} options.onEnd - function callback to execute on the end of the animation.
      * @param {boolean} options.noInit - Don't initialise the animation.
      */
     constructor(container = '#termynal', options = {}) {
@@ -45,6 +46,7 @@ class Termynal {
         this.cursor = options.cursor
             || this.container.getAttribute(`${this.pfx}-cursor`) || '▋';
         this.lineData = this.lineDataToElements(options.lineData || []);
+        this.onEnd = options.onEnd;
         if (!options.noInit) this.init()
     }
 
@@ -55,14 +57,14 @@ class Termynal {
         // Appends dynamically loaded lines to existing line elements.
         this.lines = [...this.container.querySelectorAll(`[${this.pfx}]`)].concat(this.lineData);
 
-        /** 
+        /**
          * Calculates width and height of Termynal container.
          * If container is empty and lines are dynamically loaded, defaults to browser `auto` or CSS.
-         */ 
+         */
         const containerStyle = getComputedStyle(this.container);
-        this.container.style.width = containerStyle.width !== '0px' ? 
+        this.container.style.width = containerStyle.width !== '0px' ?
             containerStyle.width : undefined;
-        this.container.style.minHeight = containerStyle.height !== '0px' ? 
+        this.container.style.minHeight = containerStyle.height !== '0px' ?
             containerStyle.height : undefined;
 
         this.container.setAttribute('data-termynal', '');
@@ -98,6 +100,8 @@ class Termynal {
 
             line.removeAttribute(`${this.pfx}-cursor`);
         }
+
+        this.onEnd();
     }
 
     /**
@@ -151,7 +155,7 @@ class Termynal {
 
     /**
      * Converts line data objects into line elements.
-     * 
+     *
      * @param {Object[]} lineData - Dynamically loaded lines.
      * @param {Object} line - Line data object.
      * @returns {Element[]} - Array of line elements.
@@ -167,7 +171,7 @@ class Termynal {
 
     /**
      * Helper function for generating attributes string.
-     * 
+     *
      * @param {Object} line - Line data object.
      * @returns {string} - String of attributes.
      */
